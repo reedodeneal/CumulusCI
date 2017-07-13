@@ -116,6 +116,8 @@ class Delete(BaseTask):
             for path_item in path:
                 for match in glob.glob(path_item):
                     self._delete(match)
+        else:
+            self._delete(path)
    
         if chdir: 
             os.chdir(cwd)
