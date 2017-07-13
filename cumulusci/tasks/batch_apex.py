@@ -40,6 +40,14 @@ class BatchApexWait(BaseSalesforceApiTask):
                          self.delta,
                          self.batch['TotalJobItems'])
 
+        self.return_values = {
+            'class': self.batch['ApexClass']['Name'],
+            'duration': self.delta,
+            'number_of_jobs': self.batch['TotalJobItems'],
+            'number_of_jobs_processed': self.batch['JobItemsProcessed'],
+            'number_of_errors': self.batch['NumberOfErrors']
+        }
+
         return self.success
 
     def _poll_action(self):
