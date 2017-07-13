@@ -25,6 +25,7 @@ class BaseTask(object):
         task_config,
         org_config=None,
         flow=None,
+        task_name=None,
         **kwargs
     ):
         self.project_config = project_config
@@ -43,6 +44,7 @@ class BaseTask(object):
 
         # the flow for this task execution
         self.flow = flow
+        self.task_name = task_name
 
         if self.salesforce_task and not self.org_config:
             raise TaskRequiresSalesforceOrg(

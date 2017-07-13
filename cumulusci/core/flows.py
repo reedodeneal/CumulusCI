@@ -160,7 +160,8 @@ class BaseFlow(object):
             self.project_config,
             task_config,
             org_config=self.org_config,
-            flow=self
+            flow=self,
+            task_name=task_name
         )
         self.tasks.append(task)
 
