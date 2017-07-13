@@ -195,3 +195,8 @@ class BaseFlow(object):
             ))
 
         return config
+
+class JUnitFlow(BaseFlow):
+    """ extends BaseFlow to output a JUnit report """
+    pass
+    

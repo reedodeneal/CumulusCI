@@ -6,6 +6,7 @@ import logging
 from collections import Callable
 
 from cumulusci.core.flows import BaseFlow
+from cumulusci.core.flows import JUnitFlow
 from cumulusci.core.tasks import BaseTask
 from cumulusci.core.config import BaseGlobalConfig
 from cumulusci.core.config import BaseProjectConfig
@@ -34,6 +35,60 @@ class _SfdcTask(BaseTask):
 
     def _run_task(self):
         return -1
+
+class TestJUnitFlow(unittest.TestCase):
+    """ Tests the JUnit report generator """
+    def setUp(self):
+        self.global_config = BaseGlobalConfig()
+        self.project_config = BaseProjectConfig(self.global_config)
+        self.project_config.config['tasks'] = {
+            'pass_name': {
+                'description': 'Pass the name',
+                'class_path':
+                    'cumulusci.core.tests.test_flows._TaskReturnsStuff',
+            },
+            'name_response': {
+                'description': 'Pass the name',
+                'class_path':
+                    'cumulusci.core.tests.test_flows._TaskResponseName',
+            },
+            'sfdc_task': {
+                'description': 'An sfdc task',
+                'class_path':
+                    'cumulusci.core.tests.test_flows._SfdcTask'
+            }
+        }
+        self.org_config = OrgConfig({
+            'username': 'sample@example',
+            'org_id': ORG_ID
+        })
+
+    def test_init(self):
+        """ JUnitFlow initializes and offers a logger """
+        flow_config = FlowConfig({})
+        flow = JUnitFlow(self.project_config, flow_config, self.org_config)
+
+        self.assertEquals(hasattr(flow, 'logger'), True)
+    
+    def test_generates_report(self):
+        """ When flow is complete, it saves a junit report """
+        raise NotImplementedError
+
+    def test_testcases_for_configured_tasks(self):
+        """ The JUnit report has a test case for each task with a junit config. """
+        raise NotImplementedError
+
+    def test_testcase_duration_mapped_to_return_value(self):
+        """ you can map testcase duration to a task return value """
+        raise NotImplementedError
+
+    def test_testcase_attr_mapped_to_parent_value(self):
+        """ you can map testcase attributes to a prior task return value """
+        raise NotImplementedError
+
+    def test_testcase_properties(self):
+        """ you can map arbitrary return values to testcase properties """
+        raise NotImplementedError
 
 
 class TestBaseFlow(unittest.TestCase):
