@@ -7,13 +7,12 @@ import mock
 import nose
 import yaml
 
+import cumulusci
 from cumulusci.core.config import BaseConfig
 from cumulusci.core.config import YamlGlobalConfig
 from cumulusci.core.config import YamlProjectConfig
 from cumulusci.core.exceptions import NotInProject
 from cumulusci.core.exceptions import ProjectConfigNotFound
-
-__location__ = os.path.dirname(os.path.realpath(__file__))
 
 
 class TestBaseConfig(unittest.TestCase):
@@ -141,7 +140,7 @@ class TestYamlGlobalConfig(unittest.TestCase):
     def test_load_global_config_no_local(self, mock_class):
         mock_class.return_value = self.tempdir_home
         config = YamlGlobalConfig()
-        with open(__location__ + '/../../cumulusci.yml', 'r') as f_expected_config:
+        with open(cumulusci.__location__ + '/cumulusci.yml', 'r') as f_expected_config:
             expected_config = yaml.load(f_expected_config)
         self.assertEquals(config.config, expected_config)
 
@@ -150,7 +149,7 @@ class TestYamlGlobalConfig(unittest.TestCase):
         mock_class.return_value = self.tempdir_home
 
         config = YamlGlobalConfig()
-        with open(__location__ + '/../../cumulusci.yml', 'r') as f_expected_config:
+        with open(cumulusci.__location__ + '/cumulusci.yml', 'r') as f_expected_config:
             expected_config = yaml.load(f_expected_config)
         self.assertEquals(config.config, expected_config)
 
@@ -160,7 +159,7 @@ class TestYamlGlobalConfig(unittest.TestCase):
         mock_class.return_value = self.tempdir_home
 
         config = YamlGlobalConfig()
-        with open(__location__ + '/../../cumulusci.yml', 'r') as f_expected_config:
+        with open(cumulusci.__location__ + '/cumulusci.yml', 'r') as f_expected_config:
             expected_config = yaml.load(f_expected_config)
         expected_config['tasks']['newtesttask'] = {}
         expected_config['tasks']['newtesttask'][
