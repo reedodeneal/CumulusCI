@@ -9,31 +9,21 @@ import time
 from cumulusci.core.exceptions import TaskRequiresSalesforceOrg
 from cumulusci.core.exceptions import TaskOptionsError
 
+from cumulusci.core.task_mixins import PollRetry, RetryableTask
 
-class BaseTask(object):
-    """ BaseTask provides the core execution logic for a Task
 
-    Subclass BaseTask and provide a `_run_task()` method with your
-    code.
-    """
+class BareTask(object):
+    """ BareTask provides the core execution logic for a Task.
+    
+    Subclasses must provide _run_task() """
     task_options = {}
     salesforce_task = False  # Does this task require a salesforce org?
 
-    def __init__(
-        self,
-        project_config,
-        task_config,
-        org_config=None,
-        flow=None,
-        **kwargs
-    ):
+    def __init__(self, project_config, task_config,
+                 org_config=None, flow=None, **kwargs):
         self.project_config = project_config
         self.task_config = task_config
         self.org_config = org_config
-        self.poll_count = 0
-        self.poll_interval_level = 0
-        self.poll_interval_s = 1
-        self.poll_complete = False
 
         # dict of return_values that can be used by task callers
         self.return_values = {}
@@ -72,10 +62,10 @@ class BaseTask(object):
             try:
                 if value.startswith('$project_config.'):
                     attr = value.replace('$project_config.', '', 1)
-                    self.options[option] = getattr(self.project_config, attr, None)
+                    self.options[option] = getattr(
+                        self.project_config, attr, None)
             except AttributeError:
                 pass
-                
 
     def _validate_options(self):
         missing_required = []
@@ -141,66 +131,10 @@ class BaseTask(object):
             self.logger.info('%15s %s', 'In org:', self.org_config.org_id)
         self.logger.info('')
 
-    def _retry(self):
-        while True:
-            try:
-                self._try()
-                break
-            except Exception as e:
-                if not (self.options['retries'] and self._is_retry_valid(e)):
-                    raise
-                if self.options['retry_interval']:
-                    self.logger.warning(
-                        'Sleeping for {} seconds before retry...'.format(
-                            self.options['retry_interval']
-                        )
-                    )
-                    time.sleep(self.options['retry_interval'])
-                    if self.options['retry_interval_add']:
-                        self.options['retry_interval'] += (
-                            self.options['retry_interval_add']
-                        )
-                self.options['retries'] -= 1
-                self.logger.warning(
-                    'Retrying ({} attempts remaining)'.format(
-                        self.options['retries']
-                    )
-                )
+class BaseTask(PollRetry, RetryableTask, BareTask):
+    """ BaseTask is the OG task with retry and polling.
+    
+    Subclass BaseTask and provide a `_run_task()` method with your code.
+    """
 
-    def _try(self):
-        raise NotImplementedError(
-            'Subclasses should provide their own implementation'
-        )
-
-    def _is_retry_valid(self, e):
-        return True
-
-    def _poll(self):
-        ''' poll for a result in a loop '''
-        while True:
-            self.poll_count += 1
-            self._poll_action()
-            if self.poll_complete:
-                break
-            time.sleep(self.poll_interval_s)
-            self._poll_update_interval()
-
-    def _poll_action(self):
-        '''
-        Poll something and process the response.
-        Set `self.poll_complete = True` to break polling loop.
-        '''
-        raise NotImplementedError(
-            'Subclasses should provide their own implementation'
-        )
-
-    def _poll_update_interval(self):
-        ''' update the polling interval to be used next iteration '''
-        # Increase by 1 second every 3 polls
-        if self.poll_count / 3 > self.poll_interval_level:
-            self.poll_interval_level += 1
-            self.poll_interval_s += 1
-            self.logger.info(
-                'Increased polling interval to %d seconds',
-                self.poll_interval_s,
-            )
+    pass
