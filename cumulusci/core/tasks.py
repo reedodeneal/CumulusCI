@@ -9,7 +9,7 @@ import time
 from cumulusci.core.exceptions import TaskRequiresSalesforceOrg
 from cumulusci.core.exceptions import TaskOptionsError
 
-from cumulusci.core.task_mixins import PollRetry, RetryableTask
+from cumulusci.core.task_mixins import PollMixin, RetryMixin
 
 
 class BareTask(object):
@@ -131,7 +131,7 @@ class BareTask(object):
             self.logger.info('%15s %s', 'In org:', self.org_config.org_id)
         self.logger.info('')
 
-class BaseTask(PollRetry, RetryableTask, BareTask):
+class BaseTask(PollMixin, RetryMixin, BareTask):
     """ BaseTask is the OG task with retry and polling.
     
     Subclass BaseTask and provide a `_run_task()` method with your code.
