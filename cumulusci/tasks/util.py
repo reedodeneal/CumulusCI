@@ -4,11 +4,11 @@ import time
 import glob
 from xml.dom.minidom import parse
 
-from cumulusci.core.tasks import BaseTask
+from cumulusci.core.tasks import BareTask
 from cumulusci.utils import download_extract_zip
 
 
-class DownloadZip(BaseTask):
+class DownloadZip(BareTask):
     name = 'Download'
     task_options = {
         'url': {
@@ -40,7 +40,7 @@ class DownloadZip(BaseTask):
         )
 
 
-class ListMetadataTypes(BaseTask):
+class ListMetadataTypes(BareTask):
     name = 'ListMetadataTypes'
     task_options = {
         'package_xml': {'description': (
@@ -74,7 +74,7 @@ class ListMetadataTypes(BaseTask):
         )
 
 
-class Sleep(BaseTask):
+class Sleep(BareTask):
     name = 'Sleep'
     task_options = {
         'seconds': {
@@ -90,7 +90,7 @@ class Sleep(BaseTask):
         time.sleep(float(self.options['seconds']))
         self.logger.info('Done')
 
-class Delete(BaseTask):
+class Delete(BareTask):
     name = 'Delete'
     task_options = {
         'path': {
@@ -137,7 +137,7 @@ class Delete(BaseTask):
             os.remove(path)
 
 
-class FindReplace(BaseTask):
+class FindReplace(BareTask):
     task_options = {
         'find': {
             'description': "The string to search for",
@@ -194,7 +194,7 @@ class FindReplaceRegex(FindReplace):
             logger = self.logger,
         )
 
-class CopyFile(BaseTask):
+class CopyFile(BareTask):
     task_options = {
         'src': {
             'description': 'The path to the source file to copy',

@@ -2,9 +2,9 @@ import glob
 import os
 import lxml.etree as ET
 from xml.sax.saxutils import escape
-from cumulusci.core.tasks import BaseTask
+from cumulusci.core.tasks import BareTask
 
-class RemoveElementsXPath(BaseTask):
+class RemoveElementsXPath(BareTask):
     task_options = {
         'elements': {
             'description': 'A list of dictionaries containing path and xpath keys. The path key is a file path that supports wildcards and xpath is the xpath for the elements to remove.  Multiple dictionaries can be passed in the list to run multiple removal queries in the same task.  Metadata elements in the xpath need to be prefixed with ns:, for example: ./ns:Layout/ns:relatedLists',

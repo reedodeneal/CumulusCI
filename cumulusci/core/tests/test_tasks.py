@@ -4,7 +4,7 @@ import unittest
 import logging
 import collections
 
-from cumulusci.core.tasks import BaseTask
+from cumulusci.core.tasks import BareTask
 from cumulusci.core.flows import BaseFlow
 from cumulusci.core.config import BaseGlobalConfig
 from cumulusci.core.config import BaseProjectConfig
@@ -18,13 +18,13 @@ ORG_ID = '00D000000000001'
 USERNAME = 'sample@example'
 
 
-class _TaskHasResult(BaseTask):
+class _TaskHasResult(BareTask):
 
     def _run_task(self):
         return -1
 
 
-class _SfdcTask(BaseTask):
+class _SfdcTask(BareTask):
     salesforce_task = True
 
     def _run_task(self):
@@ -39,7 +39,7 @@ class TestBaseTaskCallable(unittest.TestCase):
     BaseTask has basic logging
     """
 
-    task_class = BaseTask
+    task_class = BareTask
 
     @classmethod
     def setUpClass(cls):
@@ -86,7 +86,7 @@ class TestBaseTaskCallable(unittest.TestCase):
     def test_get_return_values(self):
         """ Callable interface returns retvals """
 
-        class _TaskReturnsStuff(BaseTask):
+        class _TaskReturnsStuff(BareTask):
 
             def _run_task(self):
                 self.return_values['name'] = 'return!'

@@ -1,8 +1,8 @@
 from github3 import login
 
-from cumulusci.core.tasks import BaseTask
+from cumulusci.core.tasks import BareTask
 
-class BaseGithubTask(BaseTask):
+class BaseGithubTask(BareTask):
 
     def _init_task(self):
         self.github_config = self.project_config.keychain.get_service('github')

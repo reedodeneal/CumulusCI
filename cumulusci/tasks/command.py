@@ -12,10 +12,10 @@ import subprocess
 
 from cumulusci.core.exceptions import CommandException
 from cumulusci.core.exceptions import BrowserTestFailure
-from cumulusci.core.tasks import BaseTask
+from cumulusci.core.tasks import BareTask
 
 
-class Command(BaseTask):
+class Command(BareTask):
     """ Execute a shell command in a subprocess """
     task_options = {
         'command': {

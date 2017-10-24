@@ -4,10 +4,10 @@ import re
 from lxml import etree as ET
 import sys
 
-from cumulusci.core.tasks import BaseTask
+from cumulusci.core.tasks import BareTask
 
 
-class MetaXmlBaseTask(BaseTask):
+class MetaXmlBaseTask(BareTask):
 
     def _init_options(self, kwargs):
         super(MetaXmlBaseTask, self)._init_options(kwargs)

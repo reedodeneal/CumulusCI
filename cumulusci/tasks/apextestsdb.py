@@ -6,10 +6,10 @@ import json
 import requests
 
 from cumulusci.core.exceptions import ApextestsdbError
-from cumulusci.core.tasks import BaseTask
+from cumulusci.core.tasks import BareTask
 
 
-class BaseApextestsdbTask(BaseTask):
+class BaseApextestsdbTask(Baretask):
     """ base class for apextestsdb """
 
     def _init_task(self):

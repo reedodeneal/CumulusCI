@@ -23,7 +23,7 @@ import xmltodict
 from cumulusci.core.exceptions import ApexTestException
 from cumulusci.core.exceptions import SalesforceException
 from cumulusci.core.exceptions import TaskOptionsError
-from cumulusci.core.tasks import BaseTask
+from cumulusci.core.tasks import  BareTask
 from cumulusci.core.utils import process_bool_arg
 from cumulusci.tasks.metadata.package import PackageXmlGenerator
 from cumulusci.salesforce_api.exceptions import MetadataApiError
@@ -47,7 +47,7 @@ from cumulusci.utils import zip_tokenize_namespace
 from cumulusci.utils import zip_subfolder
 
 
-class BaseSalesforceTask(BaseTask):
+class BaseSalesforceTask(BareTask):
     name = 'BaseSalesforceTask'
     salesforce_task = True
 

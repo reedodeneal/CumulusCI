@@ -10,6 +10,7 @@ from simple_salesforce import SalesforceGeneralError
 from cumulusci.tasks.salesforce import BaseSalesforceApiTask
 from cumulusci.core.exceptions import TaskOptionsError, ApexTestException
 from cumulusci.core.utils import process_bool_arg, decode_to_unicode
+from cumulusci.core.task_mixins import PollMixin, RetryMixin
 
 APEX_LIMITS = {
     'Soql': {'Label': 'TESTING_LIMITS: Number of SOQL queries', 'SYNC': 100, 'ASYNC': 200},
@@ -40,7 +41,7 @@ WHERE AsyncApexJobId='{}'
 """
 
 
-class RunApexTests(BaseSalesforceApiTask):
+class RunApexTests(PollMixin, RetryMixin, BaseSalesforceApiTask):
     """ Task to run Apex tests with the Tooling API and report results """
     api_version = '38.0'
     name = 'RunApexTests'

@@ -4,10 +4,10 @@ import json
 import requests
 
 from cumulusci.core.exceptions import MrbelvedereError
-from cumulusci.core.tasks import BaseTask
+from cumulusci.core.tasks import BareTask
 
 
-class BaseMrbelvedereTask(BaseTask):
+class BaseMrbelvedereTask(BareTask):
 
     def _init_task(self):
         self.mrbelvedere_config = self.project_config.keychain.get_service(

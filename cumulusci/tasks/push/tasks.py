@@ -4,7 +4,7 @@ import time
 
 from cumulusci.core.exceptions import CumulusCIException
 from cumulusci.core.exceptions import PushApiObjectNotFound
-from cumulusci.core.tasks import BaseTask
+from cumulusci.core.tasks import BareTask
 from cumulusci.tasks.push.push_api import SalesforcePushApi
 from cumulusci.tasks.salesforce import BaseSalesforceApiTask
 
@@ -448,7 +448,7 @@ class GetSubscriberList(BaseSalesforceApiTask):
         raise NotImplementedError
 
 
-class FilterSubscriberList(BaseTask):
+class FilterSubscriberList(BareTask):
     """
     Filter subscriber org list by org type, version.
     Write file with org IDs only

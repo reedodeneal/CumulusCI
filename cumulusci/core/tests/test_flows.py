@@ -6,7 +6,7 @@ import logging
 from collections import Callable
 
 from cumulusci.core.flows import BaseFlow
-from cumulusci.core.tasks import BaseTask
+from cumulusci.core.tasks import BareTask
 from cumulusci.core.config import BaseGlobalConfig
 from cumulusci.core.config import BaseProjectConfig
 from cumulusci.core.config import FlowConfig
@@ -17,19 +17,19 @@ import cumulusci.core
 ORG_ID = "00D000000000001"
 
 
-class _TaskReturnsStuff(BaseTask):
+class _TaskReturnsStuff(BareTask):
 
     def _run_task(self):
         self.return_values = {'name': 'supername'}
 
 
-class _TaskResponseName(BaseTask):
+class _TaskResponseName(BareTask):
     task_options = {'response': {'description': 'the response to print'}}
 
     def _run_task(self):
         return self.options['response']
 
-class _TaskRaisesException(BaseTask):
+class _TaskRaisesException(BareTask):
     task_options = {
         'exception': {'description': 'The exception to raise'},
         'message': {'description': 'The exception message'},
@@ -38,7 +38,7 @@ class _TaskRaisesException(BaseTask):
     def _run_task(self):
         raise self.options['exception'](self.options['message'])
 
-class _SfdcTask(BaseTask):
+class _SfdcTask(BareTask):
     salesforce_task = True
 
     def _run_task(self):

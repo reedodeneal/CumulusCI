@@ -7,7 +7,7 @@ import xml.etree.ElementTree as ET
 
 import yaml
 
-from cumulusci.core.tasks import BaseTask
+from cumulusci.core.tasks import BareTask
 
 __location__ = os.path.realpath(
     os.path.join(os.getcwd(), os.path.dirname(__file__)))
@@ -331,7 +331,7 @@ class DocumentParser(MetadataFolderParser):
     def _parse_subitem(self, item, subitem):
         return [item + '/' + subitem]
 
-class UpdatePackageXml(BaseTask):
+class UpdatePackageXml(BareTask):
     task_options = {
         'path': {
             'description': 'The path to a folder of metadata to build the package.xml from',

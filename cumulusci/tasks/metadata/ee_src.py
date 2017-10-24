@@ -2,10 +2,10 @@ import os
 from distutils.dir_util import copy_tree
 from distutils.dir_util import remove_tree
 from cumulusci.core.exceptions import TaskOptionsError
-from cumulusci.core.tasks import BaseTask
+from cumulusci.core.tasks import BareTask
 from cumulusci.utils import removeXmlElement
 
-class CreateUnmanagedEESrc(BaseTask):
+class CreateUnmanagedEESrc(BareTask):
     task_options = {
         'path': {
             'description': 'The path containing metadata to process for managed deployment',
@@ -56,7 +56,7 @@ class CreateUnmanagedEESrc(BaseTask):
             self.options['path'],
         ))
 
-class RevertUnmanagedEESrc(BaseTask):
+class RevertUnmanagedEESrc(BareTask):
     task_options = {
         'path': {
             'description': 'The path containing metadata to process for managed deployment',

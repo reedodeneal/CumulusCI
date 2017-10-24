@@ -2,10 +2,10 @@ import os
 from distutils.dir_util import copy_tree
 from distutils.dir_util import remove_tree
 from cumulusci.core.exceptions import TaskOptionsError
-from cumulusci.core.tasks import BaseTask
+from cumulusci.core.tasks import BareTask
 from cumulusci.utils import findReplace
 
-class CreateManagedSrc(BaseTask):
+class CreateManagedSrc(BareTask):
     task_options = {
         'path': {
             'description': 'The path containing metadata to process for managed deployment',
@@ -64,7 +64,7 @@ class CreateManagedSrc(BaseTask):
             self.options['path'],
         ))
 
-class RevertManagedSrc(BaseTask):
+class RevertManagedSrc(BareTask):
     task_options = {
         'path': {
             'description': 'The path containing metadata to process for managed deployment',
