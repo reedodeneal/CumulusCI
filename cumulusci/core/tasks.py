@@ -92,7 +92,7 @@ class BaseTask(object):
             if config.get('required') and name not in self.options:
                 missing_required.append(name)
                 continue
-            if self.options[name] is None:
+            if config.get('required') and self.options[name] is None:
                 # explicitly disallow None for required opts.
                 missing_required.append(name)
 
