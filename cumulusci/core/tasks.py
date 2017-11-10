@@ -13,14 +13,106 @@ import time
 from cumulusci.core.exceptions import TaskRequiresSalesforceOrg
 from cumulusci.core.exceptions import TaskOptionsError
 
+class RetryMixin(object):
+    """
+    Add retry and retry with interval
 
-class BaseTask(object):
+    implementors should provide _try(self), 
+    and can also provide _is_retry_valid(self, exception)
+    to whitelist recoverable exceptions
+
+    TODO: register options and make required somehow.
+    """
+    def _retry(self):
+        while True:
+            try:
+                self._try()
+                break
+            except Exception as e:
+                if not (self.options['retries'] and self._is_retry_valid(e)):
+                    raise
+                if self.options['retry_interval']:
+                    self.logger.warning(
+                        'Sleeping for {} seconds before retry...'.format(
+                            self.options['retry_interval']
+                        )
+                    )
+                    time.sleep(self.options['retry_interval'])
+                    if self.options['retry_interval_add']:
+                        self.options['retry_interval'] += (
+                            self.options['retry_interval_add']
+                        )
+                self.options['retries'] -= 1
+                self.logger.warning(
+                    'Retrying ({} attempts remaining)'.format(
+                        self.options['retries']
+                    )
+                )
+
+    def _try(self):
+        raise NotImplementedError(
+            'Subclasses should provide their own implementation'
+        )
+
+    def _is_retry_valid(self, e):
+        return True
+
+class PollingMixin(object):
+    """
+    A polling mixin
+
+    implementors should provide _poll_action(self)
+
+
+    """
+    def _init_mixins(self):
+        self.poll_count = 0
+        self.poll_interval_level = 0
+        self.poll_interval_s = 1
+        self.poll_complete = False
+        super(PollingMixin, self)._init_mixins()
+
+    def _poll(self):
+        ''' poll for a result in a loop '''
+        while True:
+            self.poll_count += 1
+            self._poll_action()
+            if self.poll_complete:
+                break
+            time.sleep(self.poll_interval_s)
+            self._poll_update_interval()
+
+    def _poll_action(self):
+        '''
+        Poll something and process the response.
+        Set `self.poll_complete = True` to break polling loop.
+        '''
+        raise NotImplementedError(
+            'Subclasses should provide their own implementation'
+        )
+
+    def _poll_update_interval(self):
+        ''' update the polling interval to be used next iteration '''
+        # Increase by 1 second every 3 polls
+        if old_div(self.poll_count, 3) > self.poll_interval_level:
+            self.poll_interval_level += 1
+            self.poll_interval_s += 1
+            self.logger.info(
+                'Increased polling interval to %d seconds',
+                self.poll_interval_s,
+            )
+
+
+class Task(object):
+    """ Most Basic of Task """
+    task_options = {}
+
+class BaseTask(PollingMixin, RetryMixin, Task):
     """ BaseTask provides the core execution logic for a Task
 
     Subclass BaseTask and provide a `_run_task()` method with your
     code.
     """
-    task_options = {}
     salesforce_task = False  # Does this task require a salesforce org?
 
     def __init__(
@@ -34,10 +126,6 @@ class BaseTask(object):
         self.project_config = project_config
         self.task_config = task_config
         self.org_config = org_config
-        self.poll_count = 0
-        self.poll_interval_level = 0
-        self.poll_interval_s = 1
-        self.poll_complete = False
 
         # dict of return_values that can be used by task callers
         self.return_values = {}
@@ -55,9 +143,14 @@ class BaseTask(object):
             )
         self._init_logger()
         self._init_options(kwargs)
+        self._init_mixins()
         self._validate_options()
         self._update_credentials()
         self._init_task()
+
+    def _init_mixins(self):
+        """ Task mixins can use this to init themselves """
+        pass
 
     def _init_logger(self):
         """ Initializes self.logger """
@@ -153,67 +246,3 @@ class BaseTask(object):
             self.logger.info('%15s %s', 'As user:', self.org_config.username)
             self.logger.info('%15s %s', 'In org:', self.org_config.org_id)
         self.logger.info('')
-
-    def _retry(self):
-        while True:
-            try:
-                self._try()
-                break
-            except Exception as e:
-                if not (self.options['retries'] and self._is_retry_valid(e)):
-                    raise
-                if self.options['retry_interval']:
-                    self.logger.warning(
-                        'Sleeping for {} seconds before retry...'.format(
-                            self.options['retry_interval']
-                        )
-                    )
-                    time.sleep(self.options['retry_interval'])
-                    if self.options['retry_interval_add']:
-                        self.options['retry_interval'] += (
-                            self.options['retry_interval_add']
-                        )
-                self.options['retries'] -= 1
-                self.logger.warning(
-                    'Retrying ({} attempts remaining)'.format(
-                        self.options['retries']
-                    )
-                )
-
-    def _try(self):
-        raise NotImplementedError(
-            'Subclasses should provide their own implementation'
-        )
-
-    def _is_retry_valid(self, e):
-        return True
-
-    def _poll(self):
-        ''' poll for a result in a loop '''
-        while True:
-            self.poll_count += 1
-            self._poll_action()
-            if self.poll_complete:
-                break
-            time.sleep(self.poll_interval_s)
-            self._poll_update_interval()
-
-    def _poll_action(self):
-        '''
-        Poll something and process the response.
-        Set `self.poll_complete = True` to break polling loop.
-        '''
-        raise NotImplementedError(
-            'Subclasses should provide their own implementation'
-        )
-
-    def _poll_update_interval(self):
-        ''' update the polling interval to be used next iteration '''
-        # Increase by 1 second every 3 polls
-        if old_div(self.poll_count, 3) > self.poll_interval_level:
-            self.poll_interval_level += 1
-            self.poll_interval_s += 1
-            self.logger.info(
-                'Increased polling interval to %d seconds',
-                self.poll_interval_s,
-            )
