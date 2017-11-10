@@ -68,6 +68,11 @@ class BaseTask(object):
         self.options = self.task_config.options
         if self.options is None:
             self.options = {}
+
+        for name, config in list(self.task_options.items()):
+            if name not in self.options and 'default' in config:
+                self.options[name] = config.get('default')
+        
         if kwargs:
             self.options.update(kwargs)
 
@@ -84,7 +89,11 @@ class BaseTask(object):
     def _validate_options(self):
         missing_required = []
         for name, config in list(self.task_options.items()):
-            if config.get('required') is True and name not in self.options:
+            if config.get('required') and name not in self.options:
+                missing_required.append(name)
+                continue
+            if self.options[name] is None:
+                # explicitly disallow None for required opts.
                 missing_required.append(name)
 
         if missing_required:

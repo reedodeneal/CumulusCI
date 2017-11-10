@@ -13,6 +13,7 @@ from cumulusci.core.config import TaskConfig
 from cumulusci.core.config import OrgConfig
 from cumulusci.core.config import FlowConfig
 from cumulusci.core.tests.utils import MockLoggingHandler
+from cumulusci.core.exceptions import TaskOptionsError
 import cumulusci.core
 
 ORG_ID = '00D000000000001'
@@ -31,6 +32,31 @@ class _SfdcTask(BaseTask):
     def _run_task(self):
         return -1
 
+
+class _OptionsTask(BaseTask):
+    task_options = {
+        'option_a': {
+            "description": "I am a description",
+            "required": True,
+            "default": 0
+        },
+    }
+
+    def _run_task(self):
+        return self.options['option_a']
+
+
+class _ProjectOptionsTask(BaseTask):
+    task_options = {
+        'option_a': {
+            "description": "I am a description",
+            "required": True,
+            "default": "$project_config.max_val"
+        },
+    }
+
+    def _run_task(self):
+        return self.options['option_a']
 
 class TestBaseTaskCallable(unittest.TestCase):
     """ Tests for the BaseTask callable interface.
@@ -82,7 +108,7 @@ class TestBaseTaskCallable(unittest.TestCase):
             self.task_config,
             self.org_config
         )
-        self.assertEquals('baz', task.options['test_option'])
+        self.assertEqual('baz', task.options['test_option'])
 
     def test_get_return_values(self):
         """ Callable interface returns retvals """
@@ -158,3 +184,45 @@ class TestBaseTaskCallable(unittest.TestCase):
         self.assertFalse(any(
             ORG_ID in s for s in self.task_log['info']
         ))
+
+    def test_task_specified_default_option(self):
+        """ A task can specify default option values in task_options """
+        task = _OptionsTask(
+            self.project_config,
+            self.task_config,
+            self.org_config
+        )
+        task()
+        self.assertEqual(task.result, 0)
+
+    def test_task_default_refers_to_project_config(self):
+        """ A Task can specify a default option that refers to a project config var """
+        self.project_config.config['max_val'] = 100
+        task = _ProjectOptionsTask(
+            self.project_config,
+            self.task_config,
+            self.org_config
+        )
+        task()
+        self.assertEqual(task.result, 100)
+
+    def test_required_task_with_project_config(self):
+        """ if a required option refers to the project config, it must be specified """
+        
+        with self.assertRaises(TaskOptionsError):
+            task = _ProjectOptionsTask(
+                self.project_config,
+                self.task_config,
+                self.org_config
+            )
+
+    def test_task_options_override_defaults(self):
+        """ A default can be overridden"""
+        self.task_config.config['options'] = {'option_a': 1}
+        task = _OptionsTask(
+            self.project_config,
+            self.task_config,
+            self.org_config
+        )
+        task()
+        self.assertEqual(task.result, 1)
