@@ -32,6 +32,17 @@ class _SfdcTask(BaseTask):
     def _run_task(self):
         return -1
 
+class _RequiredOptionsTask(BaseTask):
+    task_options = {
+        'option_a': {
+            "description": "I am a description",
+            "required": True,
+        },
+    }
+
+    def _run_task(self):
+        return self.options['option_a']
+
 
 class _OptionsTask(BaseTask):
     task_options = {
@@ -205,6 +216,17 @@ class TestBaseTaskCallable(unittest.TestCase):
         )
         task()
         self.assertEqual(task.result, 100)
+
+    def test_required_task_option(self):
+        """ if an option is required, it must be specified """
+        
+        with self.assertRaises(TaskOptionsError):
+            task = _RequiredOptionsTask(
+                self.project_config,
+                self.task_config,
+                self.org_config
+            )
+
 
     def test_required_task_with_project_config(self):
         """ if a required option refers to the project config, it must be specified """
