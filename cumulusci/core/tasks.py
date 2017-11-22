@@ -122,6 +122,21 @@ class Task(object):
     def _log_begin(self):
         pass
 
+class SchematicTask(Task):
+    def get_schema(self):
+        pass
+
+    def describe(self):
+        pass
+
+    def validate_options_against_schema(self):
+        pass
+
+    def load_defaults(self):
+        pass
+
+    def calculate_dependent_defaults(self):
+        pass
 
 class BaseTask(PollOrRetryMixin, Task):
     def _process_exception(self, e):
@@ -133,7 +148,7 @@ class BaseTask(PollOrRetryMixin, Task):
             }
             if self.org_config:
                 tags['org username'] = self.org_config.username
-                tags['scratch org'] = self.org_config.scratch == True
+                tags['scratch org'] = self.org_config.scratch is True
             for key, value in list(self.options.items()):
                 tags['option_' + key] = value
             self.project_config.sentry.tags_context(tags)
@@ -153,4 +168,4 @@ class BaseTask(PollOrRetryMixin, Task):
         # If sentry is configured, initialize sentry for error capture
         self.project_config.init_sentry()
 
-        return super(BaseTask,self)._init_mixins()
+        return super(BaseTask, self)._init_mixins()
