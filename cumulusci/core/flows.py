@@ -188,9 +188,9 @@ class BaseFlow(object):
 
     def _render_task_config(self, task):
         config = ['Options:']
-        if not task.task_options:
+        if not task.get_task_options():
             return config
-        for option, info in list(task.task_options.items()):
+        for option, info in list(task.get_task_options().items()):
             value = task.options.get(option)
             if value is None:
                 continue
