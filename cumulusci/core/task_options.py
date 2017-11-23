@@ -9,7 +9,7 @@ VAR_SYMBOL = '$project_config.'
 
 def process_dynamic_options(context, in_data):
     for option, value in list(in_data.items()):
-        if value.startswith(VAR_SYMBOL):
+        if hasattr(value, 'startswith') and value.startswith(VAR_SYMBOL):
             in_data[option] = getattr(
                 context.project_config,
                 value.replace(VAR_SYMBOL, '', 1),
@@ -49,5 +49,5 @@ class CCIOptionHandlerMixin(object):
         self.errors['options'] = {}
         for name, config in list(self.get_task_options().items()):
             if config.get('required') is True and name not in self.options:
-                self.errors['options']['name'] = 'No data provided for required option.'
+                self.errors['options'][name] = 'No data provided for required option.'
 

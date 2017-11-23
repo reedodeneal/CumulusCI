@@ -44,6 +44,7 @@ class TestCommandTask(unittest.TestCase):
 
         self.task_config.config['options'] = {
             'command': 'ls -la',
+            'pass_env': False
         }
 
         task = Command(self.project_config, self.task_config)
@@ -94,6 +95,7 @@ class TestCommandTaskWithMockPopen(unittest.TestCase):
 
         self.task_config.config['options'] = {
             'command': 'ls -la',
+            'pass_env': False
         }
 
         self.Popen.set_command(
