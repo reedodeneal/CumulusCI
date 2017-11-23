@@ -9,8 +9,8 @@ import logging
 
 from cumulusci.core.exceptions import TaskRequiresSalesforceOrg
 from cumulusci.core.exceptions import TaskOptionsError
-from cumulusci.core.task_mixins import PollOrRetryMixin
-
+from cumulusci.core.task_behaviors import PollOrRetryMixin
+from cumulusci.core.task_options import CCIOptionHandlerMixin, MarshmallowOptionHandlerMixin
 
 class Task(object):
     """ BaseTask provides the core execution logic for a Task
@@ -69,6 +69,7 @@ class Task(object):
             except AttributeError:
                 pass
 
+
     def get_task_options(self):
         assert self.task_options is not None, (
             "'%s' needs a task_config or to override get task config!" % self.__class__.__name__
@@ -120,25 +121,25 @@ class Task(object):
         pass
 
     def _log_begin(self):
-        pass
+        """ Log the beginning of the task execution """
+        self.logger.info('Beginning task: %s', self.__class__.__name__)
+        if self.salesforce_task and not self.flow:
+            self.logger.info('%15s %s', 'As user:', self.org_config.username)
+            self.logger.info('%15s %s', 'In org:', self.org_config.org_id)
+        self.logger.info('')
 
-class SchematicTask(Task):
-    def get_schema(self):
-        pass
 
-    def describe(self):
-        pass
+class SchematicTask(MarshmallowOptionHandlerMixin, Task):
+    pass
 
-    def validate_options_against_schema(self):
-        pass
 
-    def load_defaults(self):
-        pass
+class BaseTask(CCIOptionHandlerMixin, PollOrRetryMixin, Task):
+    def _init_mixins(self):
+        # If sentry is configured, initialize sentry for error capture
+        self.project_config.init_sentry()
 
-    def calculate_dependent_defaults(self):
-        pass
+        return super(BaseTask, self)._init_mixins()
 
-class BaseTask(PollOrRetryMixin, Task):
     def _process_exception(self, e):
         if self.project_config.use_sentry:
             self.logger.info('Logging error to sentry.io')
@@ -155,17 +156,3 @@ class BaseTask(PollOrRetryMixin, Task):
 
             resp = self.project_config.sentry.captureException()
             self.project_config.sentry_event = resp
-
-    def _log_begin(self):
-        """ Log the beginning of the task execution """
-        self.logger.info('Beginning task: %s', self.__class__.__name__)
-        if self.salesforce_task and not self.flow:
-            self.logger.info('%15s %s', 'As user:', self.org_config.username)
-            self.logger.info('%15s %s', 'In org:', self.org_config.org_id)
-        self.logger.info('')
-
-    def _init_mixins(self):
-        # If sentry is configured, initialize sentry for error capture
-        self.project_config.init_sentry()
-
-        return super(BaseTask, self)._init_mixins()
