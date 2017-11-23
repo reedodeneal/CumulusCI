@@ -32,6 +32,8 @@ class Task(object):
         # simple result object for introspection, often a return_code
         self.result = None
 
+        self.errors = {}
+
         # the flow for this task execution
         self.flow = flow
 
@@ -53,22 +55,7 @@ class Task(object):
 
     def _init_options(self, kwargs):
         """ Initializes self.options """
-        self.options = self.task_config.options
-        if self.options is None:
-            self.options = {}
-        if kwargs:
-            self.options.update(kwargs)
-
-        # Handle dynamic lookup of project_config values via $project_config.attr
-        for option, value in list(self.options.items()):
-            try:
-                if value.startswith('$project_config.'):
-                    attr = value.replace('$project_config.', '', 1)
-                    self.options[option] = getattr(
-                        self.project_config, attr, None)
-            except AttributeError:
-                pass
-
+        pass
 
     def get_task_options(self):
         assert self.task_options is not None, (
