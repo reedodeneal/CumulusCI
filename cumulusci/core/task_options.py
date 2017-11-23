@@ -2,6 +2,27 @@
 
 from cumulusci.core.exceptions import TaskOptionsError
 
+from marshmallow import Schema, fields, pre_load
+
+
+VAR_SYMBOL = '$project_config.'
+
+def process_dynamic_options(context, in_data):
+    for option, value in list(in_data.items()):
+        if value.startswith(VAR_SYMBOL):
+            in_data[option] = getattr(
+                context.project_config,
+                value.replace(VAR_SYMBOL, '', 1),
+                None
+            )
+
+    return in_data
+
+class TaskSchema(Schema):
+    @pre_load
+    def process_project_config(self, in_data):
+        return process_dynamic_options(self.context, in_data)
+
 class MarshmallowOptionHandlerMixin(object):
     def _init_options(self, kwargs):
         """ Initializes self.options """
@@ -11,15 +32,8 @@ class MarshmallowOptionHandlerMixin(object):
         if kwargs:
             self.options.update(kwargs)
         
-        schema = self.get_task_options()()
+        schema = self.get_task_options()(context=self)
         self.options, self.errors['options'] = schema.load(self.options)
-        
-
-    def _validate_options(self):
-        if self.errors['options']:
-            raise TaskOptionsError(
-                self.errors['options']
-            )
 
 class CCIOptionHandlerMixin(object):
     def _init_options(self, kwargs):
@@ -30,27 +44,10 @@ class CCIOptionHandlerMixin(object):
         if kwargs:
             self.options.update(kwargs)
 
-        # Handle dynamic lookup of project_config values via $project_config.attr
-        for option, value in list(self.options.items()):
-            try:
-                if value.startswith('$project_config.'):
-                    attr = value.replace('$project_config.', '', 1)
-                    self.options[option] = getattr(
-                        self.project_config, attr, None)
-            except AttributeError:
-                pass
-    
-    def _validate_options(self):
-        missing_required = []
+        process_dynamic_options(self, self.options)
+
+        self.errors['options'] = {}
         for name, config in list(self.get_task_options().items()):
             if config.get('required') is True and name not in self.options:
-                missing_required.append(name)
+                self.errors['options']['name'] = 'No data provided for required option.'
 
-        if missing_required:
-            raise TaskOptionsError(
-                '{} requires the options ({}) '
-                'and no values were provided'.format(
-                    self.__class__.__name__,
-                    ', '.join(missing_required),
-                )
-            )

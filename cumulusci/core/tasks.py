@@ -10,7 +10,7 @@ import logging
 from cumulusci.core.exceptions import TaskRequiresSalesforceOrg
 from cumulusci.core.exceptions import TaskOptionsError
 from cumulusci.core.task_behaviors import PollOrRetryMixin
-from cumulusci.core.task_options import CCIOptionHandlerMixin, MarshmallowOptionHandlerMixin
+from cumulusci.core.task_options import CCIOptionHandlerMixin, MarshmallowOptionHandlerMixin, TaskSchema, fields
 
 class Task(object):
     """ BaseTask provides the core execution logic for a Task
@@ -86,7 +86,10 @@ class Task(object):
         pass
 
     def _validate_options(self):
-        pass
+        if self.errors['options']:
+            raise TaskOptionsError(
+                self.errors['options']
+        )
 
     def _process_exception(self, e):
         pass

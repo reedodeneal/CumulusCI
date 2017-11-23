@@ -3,15 +3,15 @@ from __future__ import unicode_literals
 
 import unittest
 
-from cumulusci.core.tasks import BaseTask, SchematicTask
+from cumulusci.core.tasks import BaseTask, SchematicTask, TaskSchema, fields
 from cumulusci.core.config import BaseGlobalConfig
 from cumulusci.core.config import BaseProjectConfig
 from cumulusci.core.config import TaskConfig
 from cumulusci.core.config import OrgConfig
 from cumulusci.core.exceptions import TaskOptionsError
 
-from marshmallow import Schema, fields
-class DynTestSchema(Schema):
+
+class DynTestSchema(TaskSchema):
     test_option = fields.Str(required=True, metadata={'description': 'test_option is required, for test reasons.'})
     value_to_return = fields.Integer(missing=-1, metadata={'description': 'value_to_return is what the task will return.'})
 
@@ -48,8 +48,7 @@ class TestBaseTaskCallable(unittest.TestCase):
             self.task_config,
             self.org_config
         )
-        #self.assertEquals('baz', task.options['test_option'])
-        self.assertEquals('$project_config.foo__bar', task.options['test_option'])
+        self.assertEquals('baz', task.options['test_option'])
 
     def test_required_options(self):
         """ Task Options marked required fail to validate """
