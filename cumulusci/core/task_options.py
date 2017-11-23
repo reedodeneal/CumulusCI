@@ -2,6 +2,15 @@
 
 from cumulusci.core.exceptions import TaskOptionsError
 
+class MarshmallowOptionHandlerMixin(object):
+    def _validate_options(self):
+        schema = self.get_task_options()()
+        result = schema.load(self.options)
+        if result.errors:
+            raise TaskOptionsError(
+                result.errors
+            )
+
 class CCIOptionHandlerMixin(object):
     def _validate_options(self):
         missing_required = []
