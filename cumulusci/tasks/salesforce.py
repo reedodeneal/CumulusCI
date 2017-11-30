@@ -565,7 +565,7 @@ class UpdateDependencies(BaseSalesforceMetadataApiTask):
         self.install_queue.append(dependency)    
 
     def _process_namespace_dependency(self, dependency, dependency_uninstalled=None):
-        dependency_version = str(dependency['version'])
+        dependency_version = '%.2f' % dependency['version']
 
         if dependency['namespace'] in self.installed:
             # Some version is installed, check what to do
